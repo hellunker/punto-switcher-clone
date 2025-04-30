@@ -1,0 +1,36 @@
+name: Build App
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller keyboard pyautogui pywin32 PyQt5 pillow
+
+      - name: Create icon
+        run: python create_icon.py
+
+      - name: Build with PyInstaller
+        run: pyinstaller --onefile --windowed punto_switcher_clone.py
+
+      - name: Create archive
+        run: Compress-Archive -Path dist/punto_switcher_clone.exe -DestinationPath PuntoSwitcherClone.zip
+        shell: pwsh
+
+      - name: Save executable as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: PuntoSwitcherClone
+          path: PuntoSwitcherClone.zip
